@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WisdomFest – Online Events</title>
+<link rel="icon" type="image/webp" href="logo.webp">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -13,7 +14,7 @@
 <header class="site-header">
   <div class="header-inner">
     <div class="logo-area">
-      <div class="logo-circle">W</div>
+      <img src="logo.webp" alt="Wisdom World School" class="logo-img">
       <div class="logo-text">
         <span class="logo-main">WisdomFest</span>
         <span class="logo-sub">Online Events Archive</span>
@@ -22,6 +23,7 @@
     <nav class="header-nav">
       <a href="#events">Events</a>
       <a href="https://wisdom.edu.in" target="_blank">Main Site</a>
+      <button class="btn-settings" onclick="openSettings()" title="API Settings">⚙</button>
     </nav>
   </div>
 </header>
@@ -35,7 +37,6 @@
       <input type="text" id="searchInput" placeholder="Search events…" oninput="filterEvents(this.value)" />
     </div>
   </div>
-  <div class="hero-overlay"></div>
 </section>
 
 <!-- EVENTS GRID -->
@@ -46,7 +47,7 @@
   </div>
   <div class="events-grid" id="eventsGrid">
 
-    <div class="event-card" data-name="Chance pe Dance" data-folder="1fWaUlE0ZMWGzbE-HVwWOR2LQs81VJRzCOSYnCakhkR4PJzbvL25fj0AQX5-38WWndbsET6f6">
+    <div class="event-card" data-name="Chance pe Dance">
       <div class="card-thumb" style="background:linear-gradient(135deg,#e74c3c,#c0392b)">
         <span class="card-icon">💃</span>
       </div>
@@ -56,12 +57,11 @@
         <p class="card-tag dance">Dance</p>
       </div>
       <div class="card-actions">
-        <button class="btn-watch" onclick="openFolder('1fWaUlE0ZMWGzbE-HVwWOR2LQs81VJRzCOSYnCakhkR4PJzbvL25fj0AQX5-38WWndbsET6f6','Chance pe Dance')">▶ Watch</button>
-        <a class="btn-open" href="https://drive.google.com/drive/folders/1fWaUlE0ZMWGzbE-HVwWOR2LQs81VJRzCOSYnCakhkR4PJzbvL25fj0AQX5-38WWndbsET6f6" target="_blank">↗ Open</a>
+        <button class="btn-watch" onclick="openEvent('1fWaUlE0ZMWGzbE-HVwWOR2LQs81VJRzCOSYnCakhkR4PJzbvL25fj0AQX5-38WWndbsET6f6','Chance pe Dance')">▶ Browse</button>
       </div>
     </div>
 
-    <div class="event-card" data-name="Genre Jam" data-folder="1Nw-AKiPiOpuyRRa1HQy-y9Bf6w3N4brAWt1yB60_NxcYXRRki9pdC11yAWBo5vA-J8QmAa6o">
+    <div class="event-card" data-name="Genre Jam">
       <div class="card-thumb" style="background:linear-gradient(135deg,#8e44ad,#6c3483)">
         <span class="card-icon">🎵</span>
       </div>
@@ -71,12 +71,11 @@
         <p class="card-tag music">Music</p>
       </div>
       <div class="card-actions">
-        <button class="btn-watch" onclick="openFolder('1Nw-AKiPiOpuyRRa1HQy-y9Bf6w3N4brAWt1yB60_NxcYXRRki9pdC11yAWBo5vA-J8QmAa6o','Genre Jam')">▶ Watch</button>
-        <a class="btn-open" href="https://drive.google.com/drive/folders/1Nw-AKiPiOpuyRRa1HQy-y9Bf6w3N4brAWt1yB60_NxcYXRRki9pdC11yAWBo5vA-J8QmAa6o" target="_blank">↗ Open</a>
+        <button class="btn-watch" onclick="openEvent('1Nw-AKiPiOpuyRRa1HQy-y9Bf6w3N4brAWt1yB60_NxcYXRRki9pdC11yAWBo5vA-J8QmAa6o','Genre Jam')">▶ Browse</button>
       </div>
     </div>
 
-    <div class="event-card" data-name="Hakuna Matata Ho ja Bawla" data-folder="1yryhmAgE3SREQKxReSstsQtRzuJDSZX4WTP_TLpgnSAF6WEv5eRFe2qcxSlR_FP4xjFOYZt5">
+    <div class="event-card" data-name="Hakuna Matata Ho ja Bawla">
       <div class="card-thumb" style="background:linear-gradient(135deg,#f39c12,#d68910)">
         <span class="card-icon">🦁</span>
       </div>
@@ -86,12 +85,11 @@
         <p class="card-tag fun">Fun</p>
       </div>
       <div class="card-actions">
-        <button class="btn-watch" onclick="openFolder('1yryhmAgE3SREQKxReSstsQtRzuJDSZX4WTP_TLpgnSAF6WEv5eRFe2qcxSlR_FP4xjFOYZt5','Hakuna Matata: Ho ja Bawla')">▶ Watch</button>
-        <a class="btn-open" href="https://drive.google.com/drive/folders/1yryhmAgE3SREQKxReSstsQtRzuJDSZX4WTP_TLpgnSAF6WEv5eRFe2qcxSlR_FP4xjFOYZt5" target="_blank">↗ Open</a>
+        <button class="btn-watch" onclick="openEvent('1yryhmAgE3SREQKxReSstsQtRzuJDSZX4WTP_TLpgnSAF6WEv5eRFe2qcxSlR_FP4xjFOYZt5','Hakuna Matata: Ho ja Bawla')">▶ Browse</button>
       </div>
     </div>
 
-    <div class="event-card" data-name="Hakuna Matata Ho ja Bawla Online" data-folder="11R1jUI3QUIAZLcv-rZysXrShjRvNLXgvuhW1HF94FAVr_GopBuW2sexrPdi0rGSjvm1yjrIx">
+    <div class="event-card" data-name="Hakuna Matata Ho ja Bawla Online">
       <div class="card-thumb" style="background:linear-gradient(135deg,#e67e22,#ca6f1e)">
         <span class="card-icon">🎉</span>
       </div>
@@ -101,12 +99,11 @@
         <p class="card-tag fun">Fun</p>
       </div>
       <div class="card-actions">
-        <button class="btn-watch" onclick="openFolder('11R1jUI3QUIAZLcv-rZysXrShjRvNLXgvuhW1HF94FAVr_GopBuW2sexrPdi0rGSjvm1yjrIx','Hakuna Matata (Online Events)')">▶ Watch</button>
-        <a class="btn-open" href="https://drive.google.com/drive/folders/11R1jUI3QUIAZLcv-rZysXrShjRvNLXgvuhW1HF94FAVr_GopBuW2sexrPdi0rGSjvm1yjrIx" target="_blank">↗ Open</a>
+        <button class="btn-watch" onclick="openEvent('11R1jUI3QUIAZLcv-rZysXrShjRvNLXgvuhW1HF94FAVr_GopBuW2sexrPdi0rGSjvm1yjrIx','Hakuna Matata (Online Events)')">▶ Browse</button>
       </div>
     </div>
 
-    <div class="event-card" data-name="Meme Makers" data-folder="1sF3VHB3oPXgwtaPWUsCcA5zt-8Vl-39V2IkUf6ERvb7qZ9L6VRJJ__8Zg7QGHeLzwxcaxVjS">
+    <div class="event-card" data-name="Meme Makers">
       <div class="card-thumb" style="background:linear-gradient(135deg,#16a085,#0e6655)">
         <span class="card-icon">😂</span>
       </div>
@@ -116,12 +113,11 @@
         <p class="card-tag comedy">Comedy</p>
       </div>
       <div class="card-actions">
-        <button class="btn-watch" onclick="openFolder('1sF3VHB3oPXgwtaPWUsCcA5zt-8Vl-39V2IkUf6ERvb7qZ9L6VRJJ__8Zg7QGHeLzwxcaxVjS','Meme Makers')">▶ Watch</button>
-        <a class="btn-open" href="https://drive.google.com/drive/folders/1sF3VHB3oPXgwtaPWUsCcA5zt-8Vl-39V2IkUf6ERvb7qZ9L6VRJJ__8Zg7QGHeLzwxcaxVjS" target="_blank">↗ Open</a>
+        <button class="btn-watch" onclick="openEvent('1sF3VHB3oPXgwtaPWUsCcA5zt-8Vl-39V2IkUf6ERvb7qZ9L6VRJJ__8Zg7QGHeLzwxcaxVjS','Meme Makers')">▶ Browse</button>
       </div>
     </div>
 
-    <div class="event-card" data-name="One Minute One Life" data-folder="1RrxeMFPkxAZQmWI6FjGZa3L6ynUFWl2YT-cH7nzaMqNtZQsyOZlRmy3XilpSppSNSNfp46eA">
+    <div class="event-card" data-name="One Minute One Life">
       <div class="card-thumb" style="background:linear-gradient(135deg,#2980b9,#1a5276)">
         <span class="card-icon">⏱️</span>
       </div>
@@ -131,12 +127,11 @@
         <p class="card-tag inspire">Inspiration</p>
       </div>
       <div class="card-actions">
-        <button class="btn-watch" onclick="openFolder('1RrxeMFPkxAZQmWI6FjGZa3L6ynUFWl2YT-cH7nzaMqNtZQsyOZlRmy3XilpSppSNSNfp46eA','One Minute One Life')">▶ Watch</button>
-        <a class="btn-open" href="https://drive.google.com/drive/folders/1RrxeMFPkxAZQmWI6FjGZa3L6ynUFWl2YT-cH7nzaMqNtZQsyOZlRmy3XilpSppSNSNfp46eA" target="_blank">↗ Open</a>
+        <button class="btn-watch" onclick="openEvent('1RrxeMFPkxAZQmWI6FjGZa3L6ynUFWl2YT-cH7nzaMqNtZQsyOZlRmy3XilpSppSNSNfp46eA','One Minute One Life')">▶ Browse</button>
       </div>
     </div>
 
-    <div class="event-card" data-name="Reel Per Gram" data-folder="1CUCwr3w97WfT2thTR3TljWZRh3qKjkzQ9itr-O4vXrpNuaLiwr0sQCpd8ZDuNBa4kssU6kuQ">
+    <div class="event-card" data-name="Reel Per Gram">
       <div class="card-thumb" style="background:linear-gradient(135deg,#e91e8c,#c2185b)">
         <span class="card-icon">🎬</span>
       </div>
@@ -146,12 +141,11 @@
         <p class="card-tag reel">Reels</p>
       </div>
       <div class="card-actions">
-        <button class="btn-watch" onclick="openFolder('1CUCwr3w97WfT2thTR3TljWZRh3qKjkzQ9itr-O4vXrpNuaLiwr0sQCpd8ZDuNBa4kssU6kuQ','Reel Per Gram')">▶ Watch</button>
-        <a class="btn-open" href="https://drive.google.com/drive/folders/1CUCwr3w97WfT2thTR3TljWZRh3qKjkzQ9itr-O4vXrpNuaLiwr0sQCpd8ZDuNBa4kssU6kuQ" target="_blank">↗ Open</a>
+        <button class="btn-watch" onclick="openEvent('1CUCwr3w97WfT2thTR3TljWZRh3qKjkzQ9itr-O4vXrpNuaLiwr0sQCpd8ZDuNBa4kssU6kuQ','Reel Per Gram')">▶ Browse</button>
       </div>
     </div>
 
-    <div class="event-card" data-name="Remix Royale" data-folder="1DlTq-b1WpbQH2kBHRBQaZZVQPNwrno_GbKpOUoyloCBJAmPGxx8Ui92pmdY_gXYErnrJkW-V">
+    <div class="event-card" data-name="Remix Royale">
       <div class="card-thumb" style="background:linear-gradient(135deg,#5b2d8e,#3d1a6b)">
         <span class="card-icon">🎧</span>
       </div>
@@ -161,12 +155,11 @@
         <p class="card-tag music">Music</p>
       </div>
       <div class="card-actions">
-        <button class="btn-watch" onclick="openFolder('1DlTq-b1WpbQH2kBHRBQaZZVQPNwrno_GbKpOUoyloCBJAmPGxx8Ui92pmdY_gXYErnrJkW-V','Remix Royale')">▶ Watch</button>
-        <a class="btn-open" href="https://drive.google.com/drive/folders/1DlTq-b1WpbQH2kBHRBQaZZVQPNwrno_GbKpOUoyloCBJAmPGxx8Ui92pmdY_gXYErnrJkW-V" target="_blank">↗ Open</a>
+        <button class="btn-watch" onclick="openEvent('1DlTq-b1WpbQH2kBHRBQaZZVQPNwrno_GbKpOUoyloCBJAmPGxx8Ui92pmdY_gXYErnrJkW-V','Remix Royale')">▶ Browse</button>
       </div>
     </div>
 
-    <div class="event-card" data-name="Tujhko Chalna Hoga" data-folder="1EoQpPkshy2v-VY2FqCJnkt7PMYevYbxJ">
+    <div class="event-card" data-name="Tujhko Chalna Hoga">
       <div class="card-thumb" style="background:linear-gradient(135deg,#d4a017,#a87800)">
         <span class="card-icon">🚶</span>
       </div>
@@ -176,12 +169,11 @@
         <p class="card-tag inspire">Inspiration</p>
       </div>
       <div class="card-actions">
-        <button class="btn-watch" onclick="openFolder('1EoQpPkshy2v-VY2FqCJnkt7PMYevYbxJ','Tujhko Chalna Hoga')">▶ Watch</button>
-        <a class="btn-open" href="https://drive.google.com/drive/folders/1EoQpPkshy2v-VY2FqCJnkt7PMYevYbxJ" target="_blank">↗ Open</a>
+        <button class="btn-watch" onclick="openEvent('1EoQpPkshy2v-VY2FqCJnkt7PMYevYbxJ','Tujhko Chalna Hoga')">▶ Browse</button>
       </div>
     </div>
 
-    <div class="event-card" data-name="Tujhko Chalna Hoga Online Events" data-folder="1c7LbHwrYfSqb9qgHLci_bHxMr-gEjkE9I1li0JqN0zb60s-MhDwbIbfap_SysjmPJq08iQcx">
+    <div class="event-card" data-name="Tujhko Chalna Hoga Online Events">
       <div class="card-thumb" style="background:linear-gradient(135deg,#27ae60,#1e8449)">
         <span class="card-icon">🌟</span>
       </div>
@@ -191,34 +183,47 @@
         <p class="card-tag inspire">Inspiration</p>
       </div>
       <div class="card-actions">
-        <button class="btn-watch" onclick="openFolder('1c7LbHwrYfSqb9qgHLci_bHxMr-gEjkE9I1li0JqN0zb60s-MhDwbIbfap_SysjmPJq08iQcx','Tujhko Chalna Hoga (Online)')">▶ Watch</button>
-        <a class="btn-open" href="https://drive.google.com/drive/folders/1c7LbHwrYfSqb9qgHLci_bHxMr-gEjkE9I1li0JqN0zb60s-MhDwbIbfap_SysjmPJq08iQcx" target="_blank">↗ Open</a>
+        <button class="btn-watch" onclick="openEvent('1c7LbHwrYfSqb9qgHLci_bHxMr-gEjkE9I1li0JqN0zb60s-MhDwbIbfap_SysjmPJq08iQcx','Tujhko Chalna Hoga (Online)')">▶ Browse</button>
       </div>
     </div>
 
   </div>
-
   <div class="no-results" id="noResults" style="display:none">
     <p>No events match your search.</p>
   </div>
 </main>
 
-<!-- MODAL -->
-<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+<!-- BROWSER MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="overlayClick(event)">
   <div class="modal-box">
     <div class="modal-header">
-      <h2 class="modal-title" id="modalTitle">Event</h2>
-      <div class="modal-header-actions">
-        <a class="modal-open-btn" id="modalOpenBtn" href="#" target="_blank">↗ Open in Drive</a>
-        <button class="modal-close" onclick="closeModal()">✕</button>
+      <div class="modal-nav">
+        <button class="modal-back" id="modalBack" onclick="navigateBack()">← Back</button>
+        <nav class="modal-breadcrumb" id="modalBreadcrumb" aria-label="breadcrumb"></nav>
       </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
-    <div class="modal-body">
-      <div class="modal-loading" id="modalLoading">
-        <div class="spinner"></div>
-        <p>Loading content…</p>
-      </div>
-      <iframe id="modalIframe" src="" allowfullscreen></iframe>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="settings-overlay" id="settingsOverlay" onclick="closeSettingsOverlay(event)">
+  <div class="settings-box">
+    <div class="settings-header">
+      <h3>⚙ API Key Setup</h3>
+      <button onclick="closeSettings()">✕</button>
+    </div>
+    <div class="settings-body">
+      <p>To browse folder contents inside the app, enter your <strong>Google Drive API key</strong>.</p>
+      <ol>
+        <li>Go to <strong>console.cloud.google.com</strong></li>
+        <li>Enable <strong>Google Drive API</strong></li>
+        <li>Create an <strong>API key</strong> (restrict to Drive API)</li>
+      </ol>
+      <input type="text" id="apiKeyInput" placeholder="AIza..." />
+      <button class="btn-save-key" onclick="saveApiKey()">Save Key</button>
+      <p class="key-note" id="keyStatus"></p>
     </div>
   </div>
 </div>
@@ -227,7 +232,7 @@
 <footer class="site-footer">
   <div class="footer-inner">
     <div class="footer-logo">
-      <div class="logo-circle small">W</div>
+      <img src="logo.webp" alt="Wisdom World School" class="logo-img small">
       <span>Wisdom World School, Kurukshetra</span>
     </div>
     <p class="footer-copy">© 2026 Wisdom World School. All rights reserved.</p>
@@ -235,6 +240,7 @@
   </div>
 </footer>
 
+<script src="config.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
