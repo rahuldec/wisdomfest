@@ -30,19 +30,19 @@ button { cursor: pointer; }
 }
 .header-inner {
   max-width: 1200px; margin: 0 auto;
-  padding: 0 24px; height: 72px;
+  padding: 0 20px; height: 52px;
   display: flex; align-items: center; justify-content: space-between;
 }
-.logo-area { display: flex; align-items: center; gap: 12px; }
+.logo-area { display: flex; align-items: center; gap: 8px; }
 .logo-img {
-  width: 48px; height: 48px; border-radius: 50%;
+  width: 34px; height: 34px; border-radius: 50%;
   object-fit: cover; flex-shrink: 0;
   border: 2px solid var(--gold);
 }
-.logo-img.small { width: 34px; height: 34px; }
+.logo-img.small { width: 28px; height: 28px; }
 .logo-text { display: flex; flex-direction: column; line-height: 1.2; }
-.logo-main { color: #fff; font-weight: 700; font-size: 18px; }
-.logo-sub  { color: var(--gold-lt); font-size: 11px; }
+.logo-main { color: #fff; font-weight: 700; font-size: 15px; }
+.logo-sub  { color: var(--gold-lt); font-size: 10px; }
 .header-nav { display: flex; align-items: center; gap: 24px; }
 .header-nav a {
   color: rgba(255,255,255,0.85); font-size: 14px; font-weight: 500;
