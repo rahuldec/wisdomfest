@@ -23,7 +23,6 @@
     <nav class="header-nav">
       <a href="#events">Events</a>
       <a href="https://wisdom.edu.in" target="_blank">Main Site</a>
-      <button class="btn-settings" onclick="openSettings()" title="API Settings">⚙</button>
     </nav>
   </div>
 </header>
@@ -207,27 +206,6 @@
   </div>
 </div>
 
-<!-- SETTINGS MODAL -->
-<div class="settings-overlay" id="settingsOverlay" onclick="closeSettingsOverlay(event)">
-  <div class="settings-box">
-    <div class="settings-header">
-      <h3>⚙ API Key Setup</h3>
-      <button onclick="closeSettings()">✕</button>
-    </div>
-    <div class="settings-body">
-      <p>To browse folder contents inside the app, enter your <strong>Google Drive API key</strong>.</p>
-      <ol>
-        <li>Go to <strong>console.cloud.google.com</strong></li>
-        <li>Enable <strong>Google Drive API</strong></li>
-        <li>Create an <strong>API key</strong> (restrict to Drive API)</li>
-      </ol>
-      <input type="text" id="apiKeyInput" placeholder="AIza..." />
-      <button class="btn-save-key" onclick="saveApiKey()">Save Key</button>
-      <p class="key-note" id="keyStatus"></p>
-    </div>
-  </div>
-</div>
-
 <!-- FOOTER -->
 <footer class="site-footer">
   <div class="footer-inner">
@@ -240,7 +218,6 @@
   </div>
 </footer>
 
-<script src="config.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

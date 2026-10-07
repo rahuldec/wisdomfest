@@ -4,19 +4,10 @@ const state = {
   currentFile: null
 };
 
-function getApiKey() {
-  return (typeof CONFIG !== 'undefined' && CONFIG.apiKey) || localStorage.getItem('wf_api_key') || '';
-}
-
-/* ── Google Drive API ──────────────────────────────────── */
+/* ── Drive folder API (via Vercel serverless function) ─── */
 async function listFolder(folderId) {
-  const key = getApiKey();
-  if (!key) return null;
-  const fields = 'files(id,name,mimeType,size,modifiedTime,thumbnailLink)';
-  const q = encodeURIComponent(`'${folderId}' in parents and trashed=false`);
-  const url = `https://www.googleapis.com/drive/v3/files?q=${q}&fields=${fields}&orderBy=name&pageSize=500&key=${key}`;
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error(`Drive API error: ${resp.status}`);
+  const resp = await fetch(`/api/folder?id=${encodeURIComponent(folderId)}`);
+  if (!resp.ok) throw new Error(`API error: ${resp.status}`);
   const data = await resp.json();
   return data.files || [];
 }
@@ -127,7 +118,6 @@ async function navigateTo(index) {
 
 async function navigateBack() {
   if (state.currentFile) {
-    // Go back from file viewer to folder
     state.currentFile = null;
     renderBreadcrumb();
     setLoading();
@@ -147,9 +137,6 @@ async function navigateBack() {
 /* ── Load & render folder ──────────────────────────────── */
 async function loadFolder(folderId) {
   renderBreadcrumb();
-  const key = getApiKey();
-  if (!key) { renderSetupPrompt(); return; }
-
   try {
     setLoading();
     const files = await listFolder(folderId);
@@ -157,7 +144,7 @@ async function loadFolder(folderId) {
   } catch (err) {
     setModalBody(`<div class="fb-error">
       <span>⚠️</span>
-      <p>Could not load content. Check your API key or ensure the folder is publicly shared.</p>
+      <p>Could not load content. Ensure the folder is publicly shared.</p>
       <small>${err.message}</small>
     </div>`);
   }
@@ -169,7 +156,6 @@ function renderFolderGrid(files) {
     return;
   }
 
-  // Separate folders and files, sort folders first
   const folders = files.filter(isFolder);
   const media   = files.filter(f => !isFolder(f));
 
@@ -217,7 +203,6 @@ function renderFolderGrid(files) {
 /* ── File viewer ───────────────────────────────────────── */
 function openFile(file) {
   state.currentFile = file;
-  // Push a virtual breadcrumb for the file
   const prev = state.breadcrumbs;
   state.breadcrumbs = [...prev, { id: file.id, name: file.name }];
   renderBreadcrumb();
@@ -226,18 +211,6 @@ function openFile(file) {
   setModalBody(`
     <div class="media-viewer">
       <iframe src="${url}" allowfullscreen allow="autoplay"></iframe>
-    </div>`);
-}
-
-/* ── No API key prompt ─────────────────────────────────── */
-function renderSetupPrompt() {
-  setModalBody(`
-    <div class="fb-setup">
-      <div class="fb-setup-icon">🔑</div>
-      <h3>API Key Required</h3>
-      <p>To browse folder contents in the app, a <strong>Google Drive API key</strong> is needed.</p>
-      <button class="btn-setup" onclick="closeModal();openSettings()">Open Settings ⚙</button>
-      <p class="fb-setup-hint">The key is free. See the ⚙ settings menu in the top-right for instructions.</p>
     </div>`);
 }
 
@@ -262,35 +235,8 @@ function overlayClick(e) {
 }
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeModal(); closeSettings(); }
+  if (e.key === 'Escape') closeModal();
 });
-
-/* ── Settings modal ────────────────────────────────────── */
-function openSettings() {
-  const saved = localStorage.getItem('wf_api_key') || '';
-  document.getElementById('apiKeyInput').value = saved;
-  document.getElementById('keyStatus').textContent = saved ? '✅ Key saved in browser.' : '';
-  document.getElementById('settingsOverlay').classList.add('active');
-}
-
-function closeSettings() {
-  document.getElementById('settingsOverlay').classList.remove('active');
-}
-
-function closeSettingsOverlay(e) {
-  if (e.target === document.getElementById('settingsOverlay')) closeSettings();
-}
-
-function saveApiKey() {
-  const key = document.getElementById('apiKeyInput').value.trim();
-  if (key) {
-    localStorage.setItem('wf_api_key', key);
-    document.getElementById('keyStatus').textContent = '✅ Key saved! You can now browse events.';
-  } else {
-    localStorage.removeItem('wf_api_key');
-    document.getElementById('keyStatus').textContent = 'Key cleared.';
-  }
-}
 
 /* ── Event card search ─────────────────────────────────── */
 function filterEvents(query) {
