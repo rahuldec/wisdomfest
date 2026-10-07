@@ -1,60 +1,15 @@
-/* ── State ─────────────────────────────────────────────── */
-const state = {
-  breadcrumbs: [],   // [{id, name}]
-  currentFile: null
+const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTX3kypj-_DGDGG_sf6ZlPYy2kjT4UEZyC7rii_QviH_cxNhIEKuSseM48e-OW8iAe3rEQK3Ifz2Oe0/pub?gid=1335940397&single=true&output=csv';
+
+const SKIP_COLS = new Set(['Timestamp', 'Scholar Id', 'Student Name', 'Grade & Section', 'Section']);
+
+const EVENT_ICONS = {
+  'dance': '💃', 'cut': '🎬', 'reel': '🎥', 'meme': '😂',
+  'design': '🎨', 'frame': '🖼️', 'music': '🎵', 'remix': '🎧',
+  'jam': '🎼', 'gram': '📸', 'matata': '🦁', 'minute': '⏱️',
+  'chalna': '🚶', 'genre': '🎤', 'synopsis': '📝', 'drop': '✨',
 };
 
-/* ── Drive folder API (via Vercel serverless function) ─── */
-async function listFolder(folderId) {
-  const resp = await fetch(`/api/folder?id=${encodeURIComponent(folderId)}`);
-  if (!resp.ok) throw new Error(`API error: ${resp.status}`);
-  const data = await resp.json();
-  return data.files || [];
-}
-
-/* ── File helpers ──────────────────────────────────────── */
-const FOLDER_MIME = 'application/vnd.google-apps.folder';
-
-function isFolder(f) { return f.mimeType === FOLDER_MIME; }
-function isVideo(f)  { return f.mimeType.startsWith('video/'); }
-function isImage(f)  { return f.mimeType.startsWith('image/'); }
-function isAudio(f)  { return f.mimeType.startsWith('audio/'); }
-
-function fileIcon(f) {
-  if (isFolder(f)) return '📁';
-  if (isVideo(f))  return '🎬';
-  if (isImage(f))  return '🖼️';
-  if (isAudio(f))  return '🎵';
-  if (f.mimeType === 'application/pdf') return '📄';
-  return '📎';
-}
-
-function fileLabel(f) {
-  if (isFolder(f)) return 'Folder';
-  if (isVideo(f))  return 'Video';
-  if (isImage(f))  return 'Photo';
-  if (isAudio(f))  return 'Audio';
-  if (f.mimeType === 'application/pdf') return 'PDF';
-  return 'File';
-}
-
-function thumbUrl(f) {
-  return `https://drive.google.com/thumbnail?id=${f.id}&sz=w300`;
-}
-
-function previewUrl(f) {
-  return `https://drive.google.com/file/d/${f.id}/preview`;
-}
-
-function formatSize(bytes) {
-  if (!bytes) return '';
-  const kb = bytes / 1024;
-  if (kb < 1024) return `${Math.round(kb)} KB`;
-  return `${(kb / 1024).toFixed(1)} MB`;
-}
-
-/* ── Folder colours (cycle through palette) ────────────── */
-const FOLDER_GRADIENTS = [
+const GRADIENTS = [
   'linear-gradient(135deg,#e74c3c,#c0392b)',
   'linear-gradient(135deg,#8e44ad,#6c3483)',
   'linear-gradient(135deg,#2980b9,#1a5276)',
@@ -67,178 +22,160 @@ const FOLDER_GRADIENTS = [
   'linear-gradient(135deg,#f39c12,#d68910)',
 ];
 
+function eventIcon(name) {
+  const lower = name.toLowerCase();
+  for (const [k, v] of Object.entries(EVENT_ICONS)) {
+    if (lower.includes(k)) return v;
+  }
+  return '🎉';
+}
+
+/* ── CSV parsing ───────────────────────────────────────── */
+function parseCSVRow(line) {
+  const fields = [];
+  let field = '', inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { inQuotes = !inQuotes; }
+    else if (c === ',' && !inQuotes) { fields.push(field); field = ''; }
+    else { field += c; }
+  }
+  fields.push(field);
+  return fields;
+}
+
+function extractDriveId(url) {
+  if (!url) return null;
+  const m = url.match(/[?&]id=([^&\s]+)/) || url.match(/\/file\/d\/([^/?#\s]+)/);
+  return m ? m[1] : null;
+}
+
+async function loadSheet() {
+  const res = await fetch(SHEET_CSV);
+  if (!res.ok) throw new Error('Could not fetch sheet');
+  const text = await res.text();
+
+  const lines = text.split('\n').filter(l => l.trim());
+  const headers = parseCSVRow(lines[0]).map(h => h.trim().replace(/^"|"$/g, ''));
+
+  const nameIdx  = headers.indexOf('Student Name');
+  const gradeIdx = headers.indexOf('Grade & Section');
+
+  const eventCols = headers
+    .map((h, i) => ({ name: h, idx: i }))
+    .filter(col => col.name && !SKIP_COLS.has(col.name));
+
+  const events = {};
+  eventCols.forEach(col => { events[col.name] = []; });
+
+  for (let i = 1; i < lines.length; i++) {
+    const row = parseCSVRow(lines[i]);
+    const student = (row[nameIdx] || '').trim().replace(/^"|"$/g, '');
+    const grade   = (row[gradeIdx] || '').trim().replace(/^"|"$/g, '');
+
+    eventCols.forEach(col => {
+      const url = (row[col.idx] || '').trim().replace(/^"|"$/g, '');
+      if (!url) return;
+      const id = extractDriveId(url);
+      if (id) events[col.name].push({ id, student, grade });
+    });
+  }
+
+  return events;
+}
+
+/* ── Build event grid from sheet data ──────────────────── */
+function buildEventCards(events) {
+  const grid = document.getElementById('eventsGrid');
+  const countEl = document.getElementById('eventCount');
+  const entries = Object.entries(events).filter(([, files]) => files.length > 0);
+
+  countEl.textContent = `${entries.length} event${entries.length !== 1 ? 's' : ''}`;
+
+  grid.innerHTML = entries.map(([name, files], i) => `
+    <div class="event-card" data-name="${name}">
+      <div class="card-thumb" style="background:${GRADIENTS[i % GRADIENTS.length]}">
+        <span class="card-icon">${eventIcon(name)}</span>
+      </div>
+      <div class="card-body">
+        <h3>${name}</h3>
+        <p class="card-tag">${files.length} entr${files.length !== 1 ? 'ies' : 'y'}</p>
+      </div>
+      <div class="card-actions">
+        <button class="btn-watch" onclick='openEvent(${JSON.stringify(name)}, ${JSON.stringify(files)})'>▶ Browse</button>
+      </div>
+    </div>`).join('');
+}
+
+/* ── Event viewer ──────────────────────────────────────── */
+function openEvent(eventName, files) {
+  showModal(eventName);
+  renderFileGrid(files);
+}
+
+function renderFileGrid(files) {
+  if (!files.length) {
+    setModalBody('<div class="fb-empty"><span>📭</span><p>No entries yet.</p></div>');
+    return;
+  }
+
+  const cards = files.map(f => `
+    <div class="fb-card fb-file" onclick='openFile(${JSON.stringify(f)})'>
+      <div class="fb-card-thumb file-thumb">
+        <img src="https://drive.google.com/thumbnail?id=${f.id}&sz=w300" alt="${f.student}"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="fb-icon-fallback" style="display:none">🎬</div>
+        <div class="play-overlay">▶</div>
+      </div>
+      <div class="fb-card-info">
+        <span class="fb-card-name" title="${f.student}">${f.student}</span>
+        <span class="fb-card-meta">${f.grade}</span>
+      </div>
+    </div>`).join('');
+
+  setModalBody(`
+    <div class="fb-scroll">
+      <div class="fb-section-label">Entries <span>${files.length}</span></div>
+      <div class="fb-grid">${cards}</div>
+    </div>`);
+}
+
+function openFile(f) {
+  const url = `https://drive.google.com/file/d/${f.id}/preview`;
+  setModalBody(`
+    <div class="media-viewer">
+      <iframe src="${url}" allowfullscreen allow="autoplay"></iframe>
+    </div>
+    <div style="padding:12px 16px;background:var(--surface);border-top:1px solid var(--border)">
+      <strong>${f.student}</strong> · <span style="color:var(--text-muted)">${f.grade}</span>
+    </div>`);
+}
+
 /* ── Modal helpers ─────────────────────────────────────── */
 function setModalBody(html) {
   document.getElementById('modalBody').innerHTML = html;
 }
 
-function setLoading() {
-  setModalBody(`
-    <div class="fb-loading">
-      <div class="spinner"></div>
-      <p>Loading content…</p>
-    </div>`);
-}
-
-function renderBreadcrumb() {
-  const el = document.getElementById('modalBreadcrumb');
-  const backBtn = document.getElementById('modalBack');
-  backBtn.style.display = state.breadcrumbs.length > 1 ? 'inline-flex' : 'none';
-  el.innerHTML = state.breadcrumbs.map((crumb, i) => {
-    const isLast = i === state.breadcrumbs.length - 1;
-    return isLast
-      ? `<span class="crumb active">${crumb.name}</span>`
-      : `<span class="crumb link" onclick="navigateTo(${i})">${crumb.name}</span><span class="crumb-sep">›</span>`;
-  }).join('');
-}
-
-/* ── Navigation ────────────────────────────────────────── */
-async function openEvent(folderId, name) {
-  state.breadcrumbs = [{ id: folderId, name }];
-  state.currentFile = null;
-  showModal();
-  await loadFolder(folderId);
-}
-
-async function drillInto(folder) {
-  state.breadcrumbs.push({ id: folder.id, name: folder.name });
-  state.currentFile = null;
-  renderBreadcrumb();
-  setLoading();
-  await loadFolder(folder.id);
-}
-
-async function navigateTo(index) {
-  state.breadcrumbs = state.breadcrumbs.slice(0, index + 1);
-  state.currentFile = null;
-  renderBreadcrumb();
-  setLoading();
-  await loadFolder(state.breadcrumbs[index].id);
-}
-
-async function navigateBack() {
-  if (state.currentFile) {
-    state.currentFile = null;
-    renderBreadcrumb();
-    setLoading();
-    const current = state.breadcrumbs[state.breadcrumbs.length - 1];
-    await loadFolder(current.id);
-    return;
-  }
-  if (state.breadcrumbs.length > 1) {
-    state.breadcrumbs.pop();
-    renderBreadcrumb();
-    setLoading();
-    const current = state.breadcrumbs[state.breadcrumbs.length - 1];
-    await loadFolder(current.id);
-  }
-}
-
-/* ── Load & render folder ──────────────────────────────── */
-async function loadFolder(folderId) {
-  renderBreadcrumb();
-  try {
-    setLoading();
-    const files = await listFolder(folderId);
-    renderFolderGrid(files);
-  } catch (err) {
-    setModalBody(`<div class="fb-error">
-      <span>⚠️</span>
-      <p>Could not load content. Ensure the folder is publicly shared.</p>
-      <small>${err.message}</small>
-    </div>`);
-  }
-}
-
-function renderFolderGrid(files) {
-  if (!files.length) {
-    setModalBody('<div class="fb-empty"><span>📭</span><p>This folder is empty.</p></div>');
-    return;
-  }
-
-  const folders = files.filter(isFolder);
-  const media   = files.filter(f => !isFolder(f));
-
-  const folderCards = folders.map((f, i) => `
-    <div class="fb-card fb-folder" onclick="drillInto(${JSON.stringify(f).replace(/"/g,'&quot;')})">
-      <div class="fb-card-thumb folder-thumb" style="background:${FOLDER_GRADIENTS[i % FOLDER_GRADIENTS.length]}">
-        <span class="fb-card-icon">📁</span>
-      </div>
-      <div class="fb-card-info">
-        <span class="fb-card-name" title="${f.name}">${f.name}</span>
-        <span class="fb-card-meta">Folder</span>
-      </div>
-    </div>`).join('');
-
-  const mediaCards = media.map(f => {
-    const showThumb = isImage(f) || isVideo(f);
-    const thumb = showThumb
-      ? `<img src="${thumbUrl(f)}" alt="${f.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-      : '';
-    const icon = `<div class="fb-icon-fallback" style="${showThumb ? 'display:none' : ''}">${fileIcon(f)}</div>`;
-    return `
-    <div class="fb-card fb-file" onclick="openFile(${JSON.stringify(f).replace(/"/g,'&quot;')})">
-      <div class="fb-card-thumb file-thumb">
-        ${thumb}
-        ${icon}
-        ${isVideo(f) ? '<div class="play-overlay">▶</div>' : ''}
-      </div>
-      <div class="fb-card-info">
-        <span class="fb-card-name" title="${f.name}">${f.name}</span>
-        <span class="fb-card-meta">${fileLabel(f)}${f.size ? ' · ' + formatSize(+f.size) : ''}</span>
-      </div>
-    </div>`;
-  }).join('');
-
-  const sectionFolders = folders.length
-    ? `<div class="fb-section-label">Folders <span>${folders.length}</span></div>
-       <div class="fb-grid">${folderCards}</div>` : '';
-  const sectionMedia = media.length
-    ? `<div class="fb-section-label">Files <span>${media.length}</span></div>
-       <div class="fb-grid">${mediaCards}</div>` : '';
-
-  setModalBody(`<div class="fb-scroll">${sectionFolders}${sectionMedia}</div>`);
-}
-
-/* ── File viewer ───────────────────────────────────────── */
-function openFile(file) {
-  state.currentFile = file;
-  const prev = state.breadcrumbs;
-  state.breadcrumbs = [...prev, { id: file.id, name: file.name }];
-  renderBreadcrumb();
-
-  const url = previewUrl(file);
-  setModalBody(`
-    <div class="media-viewer">
-      <iframe src="${url}" allowfullscreen allow="autoplay"></iframe>
-    </div>`);
-}
-
-/* ── Modal open / close ────────────────────────────────── */
-function showModal() {
+function showModal(title) {
+  document.getElementById('modalBreadcrumb').innerHTML =
+    `<span class="crumb active">${title}</span>`;
+  document.getElementById('modalBack').style.display = 'none';
   document.getElementById('modalOverlay').classList.add('active');
   document.body.style.overflow = 'hidden';
-  setModalBody('<div class="fb-loading"><div class="spinner"></div><p>Loading…</p></div>');
-  document.getElementById('modalBack').style.display = 'none';
-  document.getElementById('modalBreadcrumb').innerHTML = '';
 }
 
 function closeModal() {
   document.getElementById('modalOverlay').classList.remove('active');
   document.body.style.overflow = '';
-  state.breadcrumbs = [];
-  state.currentFile = null;
 }
 
 function overlayClick(e) {
   if (e.target === document.getElementById('modalOverlay')) closeModal();
 }
 
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeModal();
-});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-/* ── Event card search ─────────────────────────────────── */
+/* ── Search ────────────────────────────────────────────── */
 function filterEvents(query) {
   const q = query.trim().toLowerCase();
   const cards = document.querySelectorAll('.event-card');
@@ -251,3 +188,15 @@ function filterEvents(query) {
   document.getElementById('eventCount').textContent = `${visible} event${visible !== 1 ? 's' : ''}`;
   document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
 }
+
+/* ── Init ──────────────────────────────────────────────── */
+(async () => {
+  const grid = document.getElementById('eventsGrid');
+  grid.innerHTML = '<div class="fb-loading" style="padding:60px 0;grid-column:1/-1"><div class="spinner"></div><p>Loading events…</p></div>';
+  try {
+    const events = await loadSheet();
+    buildEventCards(events);
+  } catch (err) {
+    grid.innerHTML = `<div class="fb-error" style="grid-column:1/-1"><span>⚠️</span><p>Could not load events.</p><small>${err.message}</small></div>`;
+  }
+})();
